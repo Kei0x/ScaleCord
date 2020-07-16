@@ -1,0 +1,14 @@
+#!/bin/sh
+VAR_FILE='discord.tfvars'
+tf() {
+    cmd="$1"
+    shift
+    terraform "$cmd" -var-file "$VAR_FILE" $@
+}
+if [ "$1" = "up" ]; then
+    tf init
+    tf apply
+    ssh -X -i "$HOME/.ssh/scaleway_rsa" -o 'StrictHostKeyChecking=no' -o 'UserKnownHostsFile=/dev/null' root@"$(terraform output public_ip)" bin/run_discord
+elif [ "$1" = "down" ]; then
+    tf destroy
+fi
